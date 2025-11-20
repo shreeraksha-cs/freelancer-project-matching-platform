@@ -70,5 +70,11 @@ Follow these steps to get the application running locally.
 
 ### 2. Clone the Repository
 ```bash
-git clone [https://github.com/your-username/your-repo-name.git](https://github.com/your-username/your-repo-name.git)
-cd your-repo-name
+git clone "shreeraksha-cs/freelancer-project-matching-platform"
+cd freelancer-project-matching-platform
+```
+
+### 3. Run the app.py file
+```bash
+streamlit run app.py
+```
