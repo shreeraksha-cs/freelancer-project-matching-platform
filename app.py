@@ -471,10 +471,6 @@ def get_projects(status=None):
     return projects
 
 def call_sp_get_client_projects(client_id):
-    """
-    [NEW] Calls the 'sp_GetClientProjects' stored procedure.
-    This replaces the old get_projects() + Python filter.
-    """
     conn = get_database_connection()
     cursor = conn.cursor(dictionary=True)
     try:
@@ -499,9 +495,6 @@ def call_sp_get_client_projects(client_id):
         conn.close()
 
 def call_fn_get_project_app_count(project_id):
-    """
-    [NEW] Calls the 'fn_get_project_app_count' SQL function.
-    """
     conn = get_database_connection()
     cursor = conn.cursor()
     try:
@@ -518,7 +511,6 @@ def call_fn_get_project_app_count(project_id):
         conn.close()
 
 def get_all_skills():
-    """[NEW] Gets a list of all skill names from the Skills table."""
     conn = get_database_connection()
     cursor = conn.cursor(dictionary=True)
     try:
@@ -533,9 +525,6 @@ def get_all_skills():
         conn.close()
 
 def call_sp_get_freelancers_by_skill(skill_name):
-    """
-    [NEW] Calls the 'sp_GetFreelancersBySkill' stored procedure.
-    """
     conn = get_database_connection()
     cursor = conn.cursor(dictionary=True)
     try:
@@ -570,9 +559,6 @@ def get_all_freelancers():
         conn.close()
 
 def call_fn_has_skill(freelancer_id, skill_name):
-    """
-    [NEW] Calls the 'fn_HasSkill' SQL function.
-    """
     conn = get_database_connection()
     cursor = conn.cursor()
     try:
@@ -589,10 +575,6 @@ def call_fn_has_skill(freelancer_id, skill_name):
         conn.close()
 
 def get_all_freelancers_with_ratings():
-    """
-    [NEW] Gets all freelancers and their current ratings.
-    Used to demonstrate the trg_UpdateFreelancerRating trigger.
-    """
     conn = get_database_connection()
     cursor = conn.cursor(dictionary=True)
     try:
@@ -1294,172 +1276,6 @@ def show_client_dashboard():
                 else:
                     st.error(f"**No**, {freelancer_name} does not have the skill: **{selected_skill_to_check}**.")
 
-# def show_freelancer_dashboard():
-#     st.markdown(f'''
-#         <div class="welcome-header">
-#             <h1>Welcome, {st.session_state.username}! </h1>
-#             <p>Manage your projects and track progress all in one place</p>
-#         </div>
-#     ''', unsafe_allow_html=True)
-    
-#     tab1, tab2, tab3, tab4 = st.tabs([
-#         "Browse Projects ", 
-#         "My Active Projects ",
-#         "My Applications ", 
-#         "Manage Profile "
-#     ])
-    
-#     with tab1:
-#         # st.markdown('''
-#         #     <div class="content-card">
-#         #         <h2>Available Projects</h2>
-#         #     </div>
-#         # ''', unsafe_allow_html=True)
-        
-#         projects = get_projects('open')
-        
-#         if projects:
-#             for project in projects:
-#                 with st.expander(f" {project['title']} by {project['client_name']}"):
-#                     st.markdown(f"""
-#                         <div style='background-color: #f8f7fb; padding: 1rem; border-radius: 8px;'>
-#                             <p><strong>Description:</strong> {project['description']}</p>
-#                             <p><strong>Budget:</strong> ${project['budget']}</p>
-#                             <p><small>Deadline: {project['formatted_deadline']}</small></p>
-#                         </div>
-#                         """, unsafe_allow_html=True)
-                    
-#                     st.markdown("### Submit Your Proposal")
-#                     proposal_text = st.text_area("Proposal Details", 
-#                                               placeholder="Describe why you're the best fit for this project",
-#                                               key=f"proposal_{project['project_id']}")
-                    
-#                     col1, col2 = st.columns(2)
-#                     with col1:
-#                         bid_amount = st.number_input("Your Bid ($)", 
-#                                                   min_value=0.0, 
-#                                                   max_value=float(project['budget']),
-#                                                   step=10.0,
-#                                                   key=f"bid_{project['project_id']}")
-                    
-#                     with col2:
-#                         st.write("")
-#                         st.write("")
-#                         if st.button("Submit Proposal ", key=f"submit_{project['project_id']}"):
-#                             if proposal_text and bid_amount:
-#                                 success, message = submit_proposal(
-#                                     project['project_id'],
-#                                     st.session_state.user_id,
-#                                     proposal_text,
-#                                     bid_amount
-#                                 )
-#                                 if success:
-#                                     st.success(message)
-#                                 else:
-#                                     st.error(message)
-#                             else:
-#                                 st.warning("Please fill in all fields ")
-#         else:
-#             st.info("No open projects available at the moment. Check back later! ")
-
-#     with tab2:
-#         # st.markdown('''
-#         #     <div class="content-card">
-#         #         <h2>My Active Projects</h2>
-#         #     </div>
-#         # ''', unsafe_allow_html=True)
-        
-#         active_projects = get_my_active_projects(st.session_state.user_id)
-        
-#         if not active_projects:
-#             st.info("You have no 'In Progress' projects. Once a client accepts your application, it will appear here. ")
-#         else:
-#             for project in active_projects:
-#                 st.markdown(f"""
-#                     <div class='project-card'>
-#                         <h4 style='color: #667eea;'>{project['title']}</h4>
-#                         <p><strong>Client:</strong> {project['client_name']}</p>
-#                         <p><strong>Status:</strong> {project['status'].replace('_', ' ').title()}</p>
-#                     </div>
-#                     """, unsafe_allow_html=True)
-                
-#                 if project['status'] == 'in_progress':
-#                     if st.button("Mark as Complete & Submit for Approval ", key=f"complete_{project['project_id']}"):
-#                         success, message = mark_project_for_approval(project['project_id'])
-#                         if success:
-#                             st.success(message)
-#                             st.rerun()
-#                         else:
-#                             st.error(message)
-#                 elif project['status'] == 'pending_approval':
-#                     st.info("This project is pending client approval. ")
-                
-#                 st.markdown("---")
-
-#     with tab3:
-#         # st.markdown('''
-#         #     <div class="content-card">
-#         #         <h2>My Applications</h2>
-#         #     </div>
-#         # ''', unsafe_allow_html=True)
-            
-#         applications = get_my_applications(st.session_state.user_id)
-        
-#         if applications:
-#             for app in applications:
-#                 st.markdown(f"""
-#                     <div class='project-card'>
-#                         <h4 style='color: #667eea;'>{app['project_title']}</h4>
-#                         <p><strong>Status:</strong> {app['status'].title()}</p>
-#                         <p><strong>My Bid:</strong> ${app['bid_amount']}</p>
-#                         <p><strong>My Proposal:</strong> {app['proposal_text']}</p>
-#                     </div>
-#                     """, unsafe_allow_html=True)
-#         else:
-#             st.info("You haven't applied to any projects yet. ")
-            
-#     with tab4:
-#         st.markdown('''
-#             <div class="content-card">
-#                 <h2>Manage My Skills</h2>
-#             </div>
-#         ''', unsafe_allow_html=True)
-        
-#         with st.form("add_skill_form"):
-#             st.subheader("Add or Update Skill")
-#             skill_name = st.text_input("Skill Name (e.g., 'Python', 'Streamlit')")
-#             experience_years = st.number_input("Years of Experience", min_value=0, max_value=50, step=1)
-#             submitted_add = st.form_submit_button("Add/Update Skill")
-            
-#             if submitted_add and skill_name:
-#                 success, message = add_freelancer_skill(st.session_state.user_id, skill_name, experience_years)
-#                 if success:
-#                     st.success(message)
-#                 else:
-#                     st.error(message)
-        
-#         st.markdown("---")
-        
-#         st.subheader("My Current Skills")
-#         current_skills = get_freelancer_skills(st.session_state.user_id)
-        
-#         if current_skills:
-#             for skill in current_skills:
-#                 col1, col2, col3 = st.columns([2, 2, 1])
-#                 with col1:
-#                     st.write(f"**Skill:** {skill['skill_name']}")
-#                 with col2:
-#                     st.write(f"**Experience:** {skill['experience_years']} years")
-#                 with col3:
-#                     if st.button("Remove ", key=f"remove_{skill['skill_name']}"):
-#                         success, message = remove_freelancer_skill(st.session_state.user_id, skill['skill_name'])
-#                         if success:
-#                             st.success(message)
-#                             st.rerun()
-#                         else:
-#                             st.error(message)
-#         else:
-#             st.info("You haven't added any skills to your profile yet.")
 
 def show_freelancer_dashboard():
     st.markdown(f'''
@@ -1477,9 +1293,7 @@ def show_freelancer_dashboard():
     ])
     
     with tab1:
-        # [MODIFIED] Fetch ALL projects, not just 'open' ones
         projects = get_projects() 
-        
         if projects:
             for project in projects:
                 # Add a colored border based on status
@@ -1500,7 +1314,6 @@ def show_freelancer_dashboard():
                         </div>
                         """, unsafe_allow_html=True)
                     
-                    # --- [NEW] Conditional Logic ---
                     
                     if project['status'] == 'open':
                         # This is an open project, show the normal form
